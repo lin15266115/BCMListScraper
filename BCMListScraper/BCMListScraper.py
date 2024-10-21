@@ -10,20 +10,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.common.exceptions import StaleElementReferenceException as sere
 from selenium.common.exceptions import TimeoutException as toe
 from selenium.common.exceptions import NoSuchElementException as nsee
-from typing import Callable
-
-import login_codemao as lcmao
-import re
-import time
-import threading
-
-from selenium.webdriver.common.by import By #pip install selemium
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.remote.webdriver import WebDriver
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.common.exceptions import StaleElementReferenceException as sere
-from selenium.common.exceptions import TimeoutException as toe
-from selenium.common.exceptions import NoSuchElementException as nsee
 from selenium.common.exceptions import InvalidSelectorException as ise
 from selenium.common.exceptions import NoSuchWindowException as nswe
 from typing import Callable
