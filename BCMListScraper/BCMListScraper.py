@@ -19,12 +19,37 @@ class 接口列表:
                 ,driver: WebDriver
                 ,更新一次延时: float = 0.02
                 ) -> None:
+        """
+        这是一个用于实时获取网页上列表内容的类。它通过多线程的方式，在后台持续地从指定的XPATH位置读取列表内容，并更新对象的`列表内容`属性。如果需要停止读取，可以设置销毁标志为True。
+
+        Parameters:
+        list_XPATH (str): 一个字符串，表示要查找的列表元素的XPATH路径。
+        driver (WebDriver): 一个WebDriver对象，用于执行浏览器操作。
+        更新一次延时 (float, optional): 一个浮点数，表示每次提取列表内容后的休眠时间（单位：秒）。默认值为0.02。
+
+        Attributes:
+        driver (WebDriver): 存储传入的WebDriver对象。
+        销毁 (bool): 一个布尔值，表示是否销毁该对象。
+        列表内容 (list): 一个列表，用于存储从网页上读取的列表内容。
+        XPATH (str): 存储传入的XPATH路径。
+        refresh_delay_time (float): 存储传入的更新一次延时。
+
+        Methods:
+        彻底销毁(): 删除当前对象。
+        置接口列表(): 启动一个新线程，开始实时获取列表内容。
+        销毁列表(): 设置销毁标志为True，停止读取列表内容。
+        读取列表(list_XPATH: str, 更新一次延时): 在后台持续地从指定的XPATH位置读取列表内容，并更新对象的`列表内容`属性。
+        """
         self.driver = driver
         self.销毁 = False
         self.列表内容 = []
         self.XPATH =list_XPATH
         self.refresh_delay_time = 更新一次延时
-        self.彻底销毁 = False
+
+    def 彻底销毁(self):
+        self.销毁 = True
+        time.sleep(0.5)
+        del self
 
     def 置接口列表(self):
         """实时获取接口的列表"""
@@ -35,7 +60,7 @@ class 接口列表:
     def 销毁列表(self):
         self.销毁 = True
 
-    def 读取列表(self ,list_XPATH: str,更新一次延时):
+    def 读取列表(self ,list_XPATH: str,更新一次延时:float = 0.02):
         self.销毁 = False
         """
         该函数用于读取网页上的列表内容。首先，它会尝试定位到指定的XPATH位置并获取列表元素。如果定位失败，会进行最多10次的重试。每次重试之间会有0.5秒的延时。如果超过10次仍然无法定位到列表，将抛出ValueError异常。然后，函数会持续地从列表中提取内容，直到销毁标志被设置为True。在每次提取后，会暂停指定的时间间隔再进行下一次提取。
@@ -58,13 +83,13 @@ class 接口列表:
                     self.list_all = self.driver.find_element(By.XPATH, list_XPATH)
                     break
                 except (nsee,toe,IndexError):
-                    print("错误:未找到该列表,",end="")
+                    print("错误:未找到该列表,",end=",")
                     time.sleep(0.5)
                     retry_ += 1
                     if retry_ >= 10:
                         raise ValueError("没有找到您提供的列表位置")
                     else:
-                        print("重试定位列表{retry_}/10")
+                        print(f"重试定位列表{retry_}/10")
                 except ise:
                     print("Xpath格式错误或没有找到该元素")
                     self.销毁 = True
@@ -122,6 +147,11 @@ class 自动化脚本接口:
         for list in self.AllList:
             list.销毁列表()
 
+    def 关闭自动化脚本接口(self):
+        for list in self.AllList:
+            list.彻底销毁()
+        del self
+
     def 按下开始按钮(self):
         retry_ = 0
         while 1 :
@@ -136,20 +166,13 @@ class 自动化脚本接口:
             except  (toe,nsee,IndexError):
                 if retry_ >= 10:
                     raise lcmao.定位控件失败("多次定位编程猫作品启动按钮尝试失败，请检查网络后重试。\n如果仍然失败, 可能是程序版本过于落后。")
-                print("定位启动按钮失败, 正在尝试重新定位{retry_}/10")
+                print(f"定位启动按钮失败, 正在尝试重新定位{retry_}/10")
                 time.sleep(2.5)
 
     def 重新进入作品(self,启动接口的函数:Callable = None, args:tuple = None, kwargs:dict = None) :
         self.销毁所有关联列表()
         self.driver.refresh()
         self.按下开始按钮()
-        if args is not None and kwargs is not None:
-            启动接口的函数(*args, **kwargs)
-        elif args is not None:
-            启动接口的函数(*args)
-        elif kwargs is not None:
-            启动接口的函数(**kwargs)
-        else:
-            启动接口的函数()
+        启动接口的函数(*(args or []), **(kwargs or {}))
         for list in self.AllList:
             list.置接口列表()
